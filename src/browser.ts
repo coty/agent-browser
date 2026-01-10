@@ -435,6 +435,10 @@ export class BrowserManager {
     const context = await this.browser.newContext({
       viewport: options.viewport ?? { width: 1280, height: 720 },
     });
+    
+    // Set default timeout to 10 seconds (Playwright default is 30s)
+    context.setDefaultTimeout(10000);
+    
     this.contexts.push(context);
 
     // Create initial page
@@ -470,6 +474,7 @@ export class BrowserManager {
     const context = await this.browser.newContext({
       viewport: viewport ?? { width: 1280, height: 720 },
     });
+    context.setDefaultTimeout(10000);
     this.contexts.push(context);
 
     const page = await context.newPage();

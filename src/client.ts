@@ -128,14 +128,14 @@ export async function sendCommand(command: Record<string, unknown>): Promise<Res
       }
     });
     
-    // Timeout after 60 seconds
+    // Timeout after 15 seconds (allows for 10s Playwright timeout + overhead)
     setTimeout(() => {
       if (!resolved) {
-        debug('Command timeout after 60s');
+        debug('Command timeout after 15s');
         socket.destroy();
         reject(new Error('Command timeout'));
       }
-    }, 60000);
+    }, 15000);
   });
 }
 
