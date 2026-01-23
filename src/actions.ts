@@ -104,6 +104,7 @@ import type {
   RecordingStartCommand,
   RecordingStopCommand,
   RecordingRestartCommand,
+  DoCommand,
   NavigateData,
   ScreenshotData,
   EvaluateData,
@@ -121,6 +122,7 @@ import type {
   StylesData,
 } from './types.js';
 import { successResponse, errorResponse } from './protocol.js';
+import { BrowserAgent } from './browser-agent.js';
 
 // Callback for screencast frames - will be set by the daemon when streaming is active
 let screencastFrameCallback: ((frame: ScreencastFrame) => void) | null = null;
@@ -444,6 +446,8 @@ export async function executeCommand(command: Command, browser: BrowserManager):
         return await handleRecordingStop(command, browser);
       case 'recording_restart':
         return await handleRecordingRestart(command, browser);
+      case 'do':
+        return await handleDo(command, browser);
       default: {
         // TypeScript narrows to never here, but we handle it for safety
         const unknownCommand = command as { id: string; action: string };
@@ -2004,4 +2008,20 @@ async function handleRecordingRestart(
     previousPath: result.previousPath,
     stopped: result.stopped,
   });
+}
+
+// AI Agent handler
+
+async function handleDo(command: DoCommand, browser: BrowserManager): Promise<Response> {
+  const agent = new BrowserAgent(browser, command.config);
+  const result = await agent.execute(command.instruction);
+
+  if (result.success) {
+    return successResponse(command.id, {
+      summary: result.summary,
+      turns: result.turns,
+    });
+  } else {
+    return errorResponse(command.id, result.summary);
+  }
 }

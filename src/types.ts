@@ -805,6 +805,17 @@ export interface WindowNewCommand extends BaseCommand {
   viewport?: { width: number; height: number };
 }
 
+// AI Agent command
+export interface DoCommand extends BaseCommand {
+  action: 'do';
+  instruction: string;
+  config?: {
+    model?: string;
+    maxTurns?: number;
+    timeout?: number;
+  };
+}
+
 // Union of all command types
 export type Command =
   | LaunchCommand
@@ -929,7 +940,8 @@ export type Command =
   | ScreencastStopCommand
   | InputMouseCommand
   | InputKeyboardCommand
-  | InputTouchCommand;
+  | InputTouchCommand
+  | DoCommand;
 
 // Response types
 export interface SuccessResponse<T = unknown> {

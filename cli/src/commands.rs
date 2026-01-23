@@ -697,6 +697,51 @@ pub fn parse_command(args: &[String], flags: &Flags) -> Result<Value, ParseError
             }
         }
 
+        // === AI Agent ===
+        "do" => {
+            if rest.is_empty() {
+                return Err(ParseError::MissingArguments {
+                    context: "do".to_string(),
+                    usage: "do <instruction> [--model <model>] [--max-turns <n>]",
+                });
+            }
+
+            // Join all args as instruction (in case it's not quoted)
+            let full_instruction = rest.join(" ");
+
+            let mut cmd = json!({
+                "id": id,
+                "action": "do",
+                "instruction": full_instruction
+            });
+
+            // Parse optional flags
+            let model_idx = rest.iter().position(|&s| s == "--model");
+            let max_turns_idx = rest.iter().position(|&s| s == "--max-turns");
+
+            if model_idx.is_some() || max_turns_idx.is_some() {
+                let mut config = json!({});
+
+                if let Some(idx) = model_idx {
+                    if let Some(model) = rest.get(idx + 1) {
+                        config["model"] = json!(model);
+                    }
+                }
+
+                if let Some(idx) = max_turns_idx {
+                    if let Some(turns_str) = rest.get(idx + 1) {
+                        if let Ok(turns) = turns_str.parse::<u32>() {
+                            config["maxTurns"] = json!(turns);
+                        }
+                    }
+                }
+
+                cmd["config"] = config;
+            }
+
+            Ok(cmd)
+        }
+
         _ => Err(ParseError::UnknownCommand {
             command: cmd.to_string(),
         }),

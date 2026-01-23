@@ -778,6 +778,19 @@ const windowNewSchema = baseCommandSchema.extend({
     .optional(),
 });
 
+// AI Agent schema
+const doSchema = baseCommandSchema.extend({
+  action: z.literal('do'),
+  instruction: z.string().min(1),
+  config: z
+    .object({
+      model: z.string().optional(),
+      maxTurns: z.number().positive().optional(),
+      timeout: z.number().positive().optional(),
+    })
+    .optional(),
+});
+
 // Union schema for all commands
 const commandSchema = z.discriminatedUnion('action', [
   launchSchema,
@@ -903,6 +916,7 @@ const commandSchema = z.discriminatedUnion('action', [
   inputMouseSchema,
   inputKeyboardSchema,
   inputTouchSchema,
+  doSchema,
 ]);
 
 // Parse result type

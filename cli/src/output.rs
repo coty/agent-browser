@@ -268,6 +268,15 @@ pub fn print_response(resp: &Response, json_mode: bool, action: Option<&str>) {
             return;
         }
 
+        // AI Agent 'do' command result
+        if let Some(summary) = data.get("summary").and_then(|v| v.as_str()) {
+            if let Some(turns) = data.get("turns").and_then(|v| v.as_i64()) {
+                println!("{} {} (in {} turns)", color::success_indicator(), summary, turns);
+            } else {
+                println!("{} {}", color::success_indicator(), summary);
+            }
+            return;
+        }
         // Informational note
         if let Some(note) = data.get("note").and_then(|v| v.as_str()) {
             println!("{}", note);
@@ -1388,6 +1397,42 @@ Examples:
 "##
         }
 
+        // === AI Agent ===
+        "do" => {
+            r##"
+agent-browser do - Execute instruction using AI agent
+
+Usage: agent-browser do <instruction> [options]
+
+Executes a natural language instruction using an AI agent that controls
+the browser. The agent handles all intermediate steps (snapshots, clicks,
+fills, etc.) internally and returns only a summary of what was accomplished.
+
+This provides context isolation - the caller doesn't see the agent's
+internal state, snapshots, or reasoning, just the final result.
+
+Options:
+  --model <model>        AI model to use (default: claude-sonnet-4-20250514)
+  --max-turns <n>        Maximum agent turns (default: 15)
+
+Environment:
+  ANTHROPIC_API_KEY          Required: Your Anthropic API key
+  AGENT_BROWSER_MODEL        Default model override
+  AGENT_BROWSER_MAX_TURNS    Default max turns override
+
+Global Options:
+  --json               Output as JSON
+  --session <name>     Use specific session
+
+Examples:
+  agent-browser do "click the login button"
+  agent-browser do "fill the email field with test@example.com and click submit"
+  agent-browser do "search for 'playwright automation' and click the first result"
+  agent-browser do "log in with username 'admin' and password 'secret'"
+  agent-browser do "add an item to the cart and proceed to checkout" --max-turns 20
+"##
+        }
+
         // === Connect ===
         "connect" => {
             r##"
@@ -1442,6 +1487,7 @@ agent-browser - fast browser automation CLI for AI agents
 Usage: agent-browser <command> [args] [options]
 
 Core Commands:
+  do <instruction>           Execute instruction using AI agent
   open <url>                 Navigate to URL
   click <sel>                Click element (or @ref)
   dblclick <sel>             Double-click element

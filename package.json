@@ -52,6 +52,7 @@
   },
   "homepage": "https://github.com/vercel-labs/agent-browser#readme",
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.17",
     "playwright-core": "^1.57.0",
     "ws": "^8.19.0",
     "zod": "^3.22.4"
